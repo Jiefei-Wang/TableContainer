@@ -64,3 +64,4 @@ vignettes/*.r
 /Meta/
 
 README.html
+inst/doc
