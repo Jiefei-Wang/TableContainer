@@ -1,11 +1,11 @@
-Package: Epoch
-Title: What the Package Does (One Line, Title Case)
+Package: TableContainer
+Title: Create a Table with Row, Column, and Table Annotations
 Version: 0.0.0.9000
 Authors@R: 
-    person("Jiefei", "Wang", , "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+    person("Jiefei", "Wang", , "szwjf08@gmail.com", role = c("aut", "cre"))
+Description: 
+    The package provides a function 'TableContainer' to create a table with row, column, and table annotations. The function is similar to 'SummarizedExperiment' but with no Bioconductor dependencies. When subsetting a table, the package will automatically update the annotations to reflect the new table. 
+License: MIT
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
@@ -14,6 +14,9 @@ Depends:
     R (>= 3.5)
 Imports: 
     methods,
-    ramify
+    cli
 SystemRequirements: GNU make
 LazyData: true
+Suggests: 
+    testthat (>= 3.2.0)
+Config/testthat/edition: 3
