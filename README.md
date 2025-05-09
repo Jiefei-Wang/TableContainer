@@ -1,4 +1,13 @@
 
+[![](https://img.shields.io/badge/devel%20version-0.99.0-blue.svg)](https://github.com/Jiefei-Wang/TableContainer)
+[![](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
+[![](https://img.shields.io/github/languages/code-size/Jiefei-Wang/TableContainer.svg)](https://github.com/Jiefei-Wang/TableContainer)
+[![](https://img.shields.io/github/last-commit/Jiefei-Wang/TableContainer.svg)](https://github.com/Jiefei-Wang/TableContainer/commits/main)
+[![R-CMD-check](https://github.com/Jiefei-Wang/TableContainer/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Jiefei-Wang/TableContainer/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/Jiefei-Wang/TableContainer/graph/badge.svg)](https://app.codecov.io/gh/Jiefei-Wang/TableContainer)
+
+
 # TableContainer
 
 `TableContainer` is an R package that provides a lightweight and flexible container for managing tabular data with associated row and column annotations. It is inspired by Bioconductor's `SummarizedExperiment` but does not rely on Bioconductor dependencies, making it easier to integrate into various workflows.

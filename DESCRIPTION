@@ -1,8 +1,13 @@
 Package: TableContainer
 Title: Create a Table with Row, Column, and Table Annotations
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: 
-    person("Jiefei", "Wang", , "szwjf08@gmail.com", role = c("aut", "cre"))
+    person(
+    given = "Jiefei", 
+    family = "Wang",
+    email = "szwjf08@gmail.com", 
+    role = c("aut", "cre"),
+    comment = c(ORCID = "0000-0002-2709-5332"))
 Description: 
     The package provides a function 'TableContainer' to create a table with row, column, and table annotations. The function is similar to 'SummarizedExperiment' but with no Bioconductor dependencies. When subsetting a table, the package will automatically update the annotations to reflect the new table. 
 License: MIT
