@@ -21,7 +21,7 @@ Each row of the matrix corresponds to a row in the rowData object.}
 \item{\code{colData}}{A data.frame or NULL object describing the columns.
 Each column of the matrix corresponds to a row in the colData object.}
 
-\item{\code{metadata}}{A list or NULL containing arbitrary metadata associated
+\item{\code{metaData}}{A list or NULL containing arbitrary metadata associated
 with the overall data.}
 }}
 

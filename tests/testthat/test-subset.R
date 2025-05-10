@@ -10,7 +10,7 @@ test_that("TableContainer subsetting returns consistent slots", {
   col_dt <- data.frame(col1 = 1:col_num, col2 = letters[1:col_num])
   metadata <- list(meta1 = "meta1", meta2 = "meta2")
 
-  container <- TableContainer(tbl, rowData = row_dt, colData = col_dt, metadata = metadata)
+  container <- TableContainer(tbl, rowData = row_dt, colData = col_dt, metaData = metadata)
 
   # [3] returns single row
   container_i <- container[3]

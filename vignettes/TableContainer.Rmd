@@ -37,14 +37,14 @@ You can create a `TableContainer` object using the `TableContainer()` constructo
 tbl <- matrix(1:12, nrow = 3, ncol = 4)
 row_dt <- data.frame(row1 = 1:3, row2 = letters[1:3])
 col_dt <- data.frame(col1 = 1:4, col2 = letters[1:4])
-metadata <- list(meta1 = "meta1", meta2 = "meta2")
+meta_dt <- list(meta1 = "meta1", meta2 = "meta2")
 
 # Create a TableContainer
 container <- TableContainer(
   table = tbl,
   rowData = row_dt,
   colData = col_dt,
-  metadata = metadata
+  metaData = meta_dt
 )
 
 # Check the container
@@ -96,15 +96,42 @@ You can access and modify the table, row annotations, column annotations, and me
 tblData(container)
 rowData(container)
 colData(container)
-metadata(container)
+metaData(container)
 
 # Modify data
 tblData(container) <- matrix(13:24, nrow = 3, ncol = 4)
 rowData(container) <- data.frame(newRow = 1:3)
 colData(container) <- data.frame(newCol = 1:4)
-metadata(container) <- list(newMeta = "updated metadata")
+metaData(container) <- list(newMeta = "updated metadata")
 
 ## check the updated container
 container
 ```
 
+## Pretty Printing functions
+The `TableContainer` package also provides some pretty printing functions to help print data using a more readable format. 
+
+For a table, you can use `format_tbl` to stay within the limit of a specific row numbers and column width. The return value is a character vector, with each row for a line of the table(including the header if `include_col_names = TRUE`). The attribute `col_i` indicates how many columns are used for the output. In this example, the function used only 3 columns as the last column is too long to fit in the specified width.
+```{r}
+tbl <- data.frame(
+    x = c(1, 123, 123456678, 1235678887644),
+    y = c("abc", "this is a long string", "another long string", "yet another long string"),
+    z = c(TRUE, FALSE, TRUE, FALSE)
+)
+format_tbl(tbl, max_tbl_width = 50, max_row = 2)
+```
+
+By default, `format_tbl` uses `common_formatter` to format the cell values(and headers). You can change the formatter by passing a function to `cell_formatter `. `common_formatter` will try to keep each cell value within the character length specified by `max_len`. The default value is 20. For numeric values, the function will use scientific notation if the number of digits is larger than `max_len`. For character values, if the cell value is longer than `max_len`, it will be truncated and appended with `...`. You can also set the `max_len` to a larger value if you want to keep the original value.
+```{r}
+## within length limit, no change
+common_formatter(12345678901234567890, max_len = 20)
+
+## use scientific notation to keep it shorter
+common_formatter(12345678901234567890, max_len = 10)
+
+## within length limit, no change
+common_formatter("this is a long string", max_len = 40)
+
+## truncate the string and append with ...
+common_formatter("this is a long string", max_len = 20)
+```

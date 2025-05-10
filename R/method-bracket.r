@@ -29,13 +29,13 @@
     mat <- tblData(x)[i,j, drop = FALSE]
     rd <- rowData(x)[i, , drop = FALSE]
     cd <- colData(x)[j, , drop = FALSE]
-    metadata <- metadata(x)
+    md <- metaData(x)
 
     .TableContainer(
         table = mat,
         rowData = rd,
         colData = cd,
-        metadata = metadata
+        metaData = md
     )
 }
 

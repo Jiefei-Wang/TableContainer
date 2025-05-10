@@ -54,7 +54,7 @@ container <- TableContainer(
   table = tbl,
   rowData = row_dt,
   colData = col_dt,
-  metadata = metadata
+  metaData = metadata
 )
 ```
 
@@ -103,21 +103,21 @@ You can access and modify the table, row annotations, column annotations, and me
 tblData(container)
 rowData(container)
 colData(container)
-metadata(container)
+metaData(container)
 
 # Modify data
 tblData(container) <- matrix(13:24, nrow = 3, ncol = 4)
 rowData(container) <- data.frame(newRow = 1:3)
 colData(container) <- data.frame(newCol = 1:4)
-metadata(container) <- list(newMeta = "updated metadata")
+metaData(container) <- list(newMeta = "updated metadata")
 ```
 
 ## Documentation
 
-For detailed documentation, see the help files for the `TableContainer` class and its methods:
+For detailed documentation, see the vignette of the package:
 
 ```R
-?TableContainer
+vignette("TableContainer")
 ```
 
 ## License

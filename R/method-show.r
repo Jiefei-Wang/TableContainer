@@ -1,36 +1,31 @@
+
+
 # Helper to show a line of items (e.g., column names) fitting terminal width
-.show_item_line <- function(label, items, available_width,
+.make_item_line <- function(label, items, available_width,
                             total_item_count = NULL, # Explicitly pass total if items is a subset
                             item_label_singular = "var",
                             item_label_plural = "vars",
-                            empty_msg = "none") {
+                            empty_msg = "NULL") {
 
     if (is.null(total_item_count)) {
         total_item_count <- if (is.null(items)) 0 else length(items)
     }
 
     item_count_str <- if (total_item_count == 1) item_label_singular else item_label_plural
-    prefix <- paste0(label, "[", total_item_count, " ", item_count_str, "] ")
+    prefix <- glue("{label}[{total_item_count} {item_count_str}] ") 
 
     if (total_item_count == 0 || is.null(items) || length(items) == 0) {
-        cat(paste0(label, empty_msg, "\n"))
-        return()
+        msg <- glue("{label}{empty_msg}")
+        return(as.character(msg))
     }
     
     # Available width for the items themselves after prefix
     item_space <- available_width - nchar(prefix)
     
-    if (item_space <= 3 && total_item_count > 0) { # Not enough space for even "..." after prefix
-        # Try to print at least the prefix, truncated if it's too long for the whole line
-        if (nchar(prefix) > available_width) {
-             cat(paste0(substr(prefix, 1, available_width - 3), "...\n"))
-        } else {
-             cat(paste0(prefix, "...\n")) # Prefix fits, but no items do
-        }
-        return()
-    } else if (item_space <= 0) { # Prefix itself is too long or fills line
-        cat(paste0(substr(prefix, 1, available_width - 3), "...\n"))
-        return()
+    # If no space for items, just return the prefix
+    if (item_space <= 3 && total_item_count > 0) { 
+        msg <- glue("{prefix}...")
+        return(as.character(msg))
     }
 
 
@@ -80,9 +75,201 @@
     } else if (num_shown == 0 && total_item_count > 0) { # No items were shown, but there should be some
         current_line_items_part <- "..." # Default to ... if nothing fits
     }
-
-    cat(paste0(prefix, current_line_items_part, "\n"))
+    msg <- glue("{prefix}{current_line_items_part}")
+    return(as.character(msg))
 }
+
+
+
+# Get the width of the terminal
+get_terminal_width <- function() {
+    console_width()
+}
+
+#' Common functions for formatting table cells
+#' 
+#' @param x A vector of values to format.
+#' @param max_len The maximum length for the formatted string.
+#' @details
+#' `pretty_number` : keep all digits if we can keep it within the width limit. Otherwise, use scientific notation to reduce length. If the number still cannot fit within the length limit, return the shortest result.
+#' @seealso [format_tbl()] for formatting tables
+#' 
+#' @examples
+#' ## Format a number
+#' pretty_number(1234567890, max_len = 20)
+#' pretty_number(1234567890, max_len = 8)
+#' pretty_number(1234567890, max_len = 3)
+#' @export 
+#' @rdname prettier
+pretty_number <- function(x, max_len = 20) {
+  # Try regular format
+  regular <- format(x, scientific = FALSE, trim = TRUE)
+  if (nchar(regular) <= max_len) return(regular)
+  
+  # Try scientific with default digits
+  sci <- format(x, scientific = TRUE, digits = 4)
+  if (nchar(sci) <= max_len) return(sci)
+  
+  # Try decreasing digits in scientific format until it fits
+  for (d in 3:1) {
+    sci_short <- format(x, scientific = TRUE, digits = d)
+    if (nchar(sci_short) <= max_len) return(sci_short)
+  }
+  
+  # If nothing fits, return as is
+  sci_short
+}
+
+.common_formatter <- function(x, max_len = 20){
+    if (is.numeric(x)){
+        x2 <- pretty_number(x, max_len = max_len)
+    }else{
+        x2 <- as.character(x)
+        if (nchar(x2) > max_len){
+            x2 <- substr(x2, 1, max(max_len - 3, 0))
+            x2 <- paste0(x2, "...")
+        }
+    }
+    x2
+}
+
+
+#' Common functions for formatting table cells
+#' 
+#' @param x A vector of values to format.
+#' @details
+#' `common_formatter` : For numeric, call `pretty_number` to format the number. For non-numeric, truncate the string and append "..." if it exceeds the width limit.
+#' @examples 
+#' ## format character
+#' common_formatter("this is a long string", max_len = 40)
+#' common_formatter("this is a long string", max_len = 20)
+#' @export 
+#' @rdname prettier
+common_formatter <- function(x, max_len = 20){
+    vapply(x, .common_formatter, character(1), max_len = max_len, USE.NAMES = FALSE)
+}
+
+
+#' Format a table for display. The maximum number of columns
+#' displayed is limited by the terminal width.
+#' 
+#' @param tbl A table-like object (e.g., matrix, data.frame).
+#' @param max_tbl_width The maximum width for the table display.
+#' @param soft_table_width A softer width limit for the table display, allowing the last column to exceed it.
+#' @param max_row The maximum number of rows to display.
+#' @param cell_formatter A function to format individual cells.
+#' @param delimiter The delimiter to use for separating columns.
+#' @param truncate_marker A marker to indicate truncation of the table.
+#' @param include_row_names Logical, whether to include row names in the display.
+#' @param include_col_names Logical, whether to include column names in the display.
+#' 
+#' @return A formatted string vector representing the table. The length of the vector is the number of rows in the table.
+#' @seealso [common_formatter()] for the cell formatting function and [pretty_number()] for formatting numeric values.
+#' 
+#' @examples
+#' ## Format the table
+#' tbl <- data.frame(
+#'   x = c(1, 123, 123456678, 1235678887644), 
+#'   y = c("abc", "this is a long string", "another long string", "yet another long string"),
+#'   z = c(TRUE, FALSE, TRUE, FALSE),
+#'   d = runif(4) * 100000
+#' )
+#' formatted_tbl <- format_tbl(tbl, max_tbl_width = 50, max_row = 3)
+#' cat(formatted_tbl, sep = "\n")
+#' 
+#' @export 
+format_tbl <- function(tbl, max_tbl_width, soft_table_width = max_tbl_width,
+    max_row = 8,
+    cell_formatter = common_formatter,
+    delimiter = " ", 
+    truncate_marker = " ...",
+    include_row_names = TRUE, include_col_names = TRUE) {
+    if (is.null(tbl)) {
+        return(NULL)
+    }
+    
+    max_row <- min(max_row, nrow(tbl))
+    row_indices <- seq_len(max_row)
+    ## check the column names
+    if (include_col_names){
+        col_names <- colnames(tbl)
+        if (is.null(col_names)) {
+            col_names <- paste0("[,", seq_len(ncol(tbl)), "]")
+        }
+    } else {
+        col_names <- NULL
+    }
+
+    ## check the row names
+    if (include_row_names){
+        row_names <- rownames(tbl)
+        if (is.null(row_names)) {
+            row_names <- paste0("[", seq_len(max_row), ",]")
+        }
+    } else {
+        row_names <- NULL
+    }
+    
+    col_widths <- c()
+    total_len  <- 0
+    ## Add the row names
+    char_tbl <- c()
+    if (include_row_names){
+        col_dt <- row_names[row_indices]
+        if (include_col_names){
+            col_dt <- c("", col_dt)
+        }
+        max_col_width <- max(c(nchar(col_dt), 0), na.rm = TRUE)
+        col_widths <- c(col_widths, max_col_width)
+        total_len <- total_len + max_col_width
+        char_tbl <- cbind(char_tbl, col_dt)
+    }
+
+    col_i <- 0
+    for (i in seq_len(ncol(tbl))){
+        col_dt <- vapply(tbl[row_indices, i], cell_formatter, character(1), USE.NAMES = FALSE)
+        if (include_col_names){
+            col_dt <- c(col_names[i], col_dt)
+        }
+        max_col_width <- max(c(nchar(col_dt), 0), na.rm = TRUE)
+        col_widths <- c(col_widths, max_col_width)
+        total_len <- total_len + nchar(delimiter) + max_col_width 
+        ## For soft table width limit, we only allow the last column to exceed the limit
+        if (total_len > soft_table_width && i != ncol(tbl)){
+            break
+        }
+        ## For hard table width limit, we stop if the total length exceeds the limit
+        if (total_len > max_tbl_width){
+            break
+        }
+        col_i <- i
+        char_tbl <- cbind(char_tbl, col_dt)
+    }
+
+    if (length(char_tbl) == 0){
+        return(NULL)
+    }
+
+
+    ## left align the columns with space padding
+    for (i in seq_len(ncol(char_tbl))){
+        char_tbl[,i] <- formatC(char_tbl[,i], width = col_widths[i], flag = "-")
+    }
+
+    char_vec <- apply(char_tbl, 1, paste0, collapse = delimiter)
+
+    for (i in seq_along(char_vec)){
+        if (col_i != ncol(tbl)){
+            if (include_row_names && i == 1)
+                next
+            char_vec[i] <- paste0(char_vec[i], truncate_marker)
+        }
+    }
+
+    attr(char_vec, "col_i") <- col_i
+    char_vec
+}
+
 
 
 #' Pretty show method for TableContainer
@@ -94,149 +281,56 @@ setMethod("show", "TableContainer",
         tbl <- tblData(object)
         rd <- rowData(object)
         cd <- colData(object) 
-        md <- metadata(object)
+        md <- metaData(object)
 
-        term_width <- console_width()
-        cat(paste0("# TableContainer: ",
-                   if(is.null(tbl)) "0" else nrow(tbl), " rows x ",
-                   if(is.null(tbl)) "0" else ncol(tbl), " cols"),
-            " (", class(tbl)[1], ")\n")
+        term_width <- get_terminal_width()
 
         # --- Table Preview ---
-        if (!is.null(tbl) && nrow(tbl) > 0 && ncol(tbl) > 0) {
+        cat("# TableContainer:\n")
+        if (!is.null(tbl)) {
             nr <- nrow(tbl)
             nc <- ncol(tbl)
+            max_row <- 10
+            soft_table_width <- term_width - 4 # Leave space for ellipsis
+            hard_table_width <- term_width
+            tbl_str <- format_tbl(tbl, max_tbl_width = hard_table_width,
+                    soft_table_width = soft_table_width,
+                    max_row = max_row,
+                    cell_formatter = common_formatter,
+                    delimiter = " ", 
+                    truncate_marker = " ...",
+                    include_row_names = TRUE, include_col_names = TRUE)
             
-            max_r_show <- 7 # Max rows to print in preview
-            r_to_show <- min(nr, max_r_show)
-            
-            # --- Determine Row Names Width ---
-            rnames <- rownames(tbl)
-            if (is.null(rnames) && r_to_show > 0) rnames <- paste0("[", 1:nr, ",]") # Default row indicators
-            
-            rnames_width <- 0
-            if (r_to_show > 0) {
-                 rnames_disp <- rnames[1:r_to_show]
-                 if (is.null(rnames_disp)) rnames_disp <- paste0("[", 1:r_to_show, ",]")
-                 rnames_width <- max(nchar(rnames_disp)) + 1 # +1 for a space
-            }
-
-            # --- Determine How Many Columns to Show & Their Widths ---
-            c_to_show <- 0
-            available_for_data_cols <- term_width - rnames_width - 20 # for potential leading space or final "..."
-            available_for_data_cols <- max(available_for_data_cols, 10)
-            
-            
-            # Store calculated widths for columns that will be shown
-            final_cell_widths <- numeric(0) 
-            # Store formatted character data for the preview
-            char_data_preview_cols <- list() 
-            
-            temp_cnames_full <- colnames(tbl)
-            if (is.null(temp_cnames_full) && nc > 0) temp_cnames_full <- paste0("[,", 1:nc, "]")
-            
-            current_total_width_used_by_data <- 0
-
-            if (nc > 0) {
-                for (k_col in 1:nc) {
-                    col_data_vector <- tbl[1:r_to_show, k_col]
-                    
-                    # Format data for width calculation (and later printing)
-                    if (is.numeric(col_data_vector)) {
-                        is_int_like <- all(abs(col_data_vector - round(col_data_vector)) < 1e-6, na.rm = TRUE) &&
-                                       all(abs(col_data_vector) < 1e7, na.rm = TRUE)
-                        if (is_int_like && !anyNA(col_data_vector[is.finite(col_data_vector)])) {
-                            formatted_col_k <- format(round(col_data_vector), scientific = FALSE, trim = TRUE)
-                        } else {
-                            formatted_col_k <- formatC(col_data_vector, digits = 3, format = "g", flag = "#", width=1)
-                        }
-                    } else if (is.logical(col_data_vector)) {
-                        formatted_col_k <- ifelse(is.na(col_data_vector), "NA", ifelse(col_data_vector, " T", " F")) # Padded T/F
-                    }
-                    else {
-                        formatted_col_k <- as.character(col_data_vector)
-                    }
-                    formatted_col_k[is.na(tbl[1:r_to_show, k_col])] <- "NA" # Ensure NAs are "NA"
-                    
-                    current_col_name <- temp_cnames_full[k_col]
-                    width_for_this_col_content <- max(nchar(formatted_col_k), na.rm = TRUE)
-                    width_for_this_col_name <- nchar(current_col_name)
-                    
-                    # Actual width for this column: max of data, name; add 1 for inter-col space
-                    # Cap individual column width to prevent one very wide column hogging space
-                    this_col_total_width <- min(max(width_for_this_col_content, width_for_this_col_name, 3L) + 1L, 15L + 1L)
-
-
-                    # Check if adding this column (plus potential "..." if it's not the last actual col) fits
-                    ellipsis_for_cols_width <- if (c_to_show + 1 < nc) 4 else 0 # " ..." = 4 chars
-                    
-                    if (current_total_width_used_by_data + this_col_total_width + ellipsis_for_cols_width <= available_for_data_cols) {
-                        current_total_width_used_by_data <- current_total_width_used_by_data + this_col_total_width
-                        c_to_show <- c_to_show + 1
-                        final_cell_widths <- c(final_cell_widths, this_col_total_width -1) # Store content width
-                        char_data_preview_cols[[k_col]] <- formatted_col_k
-                    } else {
-                        break # Cannot fit this column
-                    }
+            if (!is.null(tbl)){
+                for (i in seq_along(tbl_str)){
+                    cat(tbl_str[i], "\n")
                 }
             }
-            
-            # --- Print Column Headers ---
-            if (c_to_show > 0) {
-                cat(formatC("", width = rnames_width)) # Align with row names space
-                for (j in 1:c_to_show) {
-                    # Use actual column name from temp_cnames_full, corresponding to the selected columns
-                    actual_col_idx_in_original_table <- which(sapply(char_data_preview_cols, function(x) !is.null(x)))[j]
-                    col_header_to_print <- temp_cnames_full[actual_col_idx_in_original_table]
-                    cat(formatC(col_header_to_print, width = final_cell_widths[j], flag = "-"), " ")
-                }
-                if (c_to_show < nc) cat("...")
-                cat("\n")
-            } else if (nc > 0) { # No columns fit, but columns exist
-                cat(formatC("", width = rnames_width))
-                cat("... (columns hidden due to width)\n")
-            }
-
-            # --- Print Rows of Data ---
-            actual_shown_col_indices <- which(sapply(char_data_preview_cols, function(x) !is.null(x)))
-            for (i in 1:r_to_show) {
-                cat(formatC(rnames[i], width = rnames_width -1 , flag = "-"), " ")
-                
-                for (j_idx in 1:c_to_show) {
-                    original_col_idx <- actual_shown_col_indices[j_idx]
-                    val_str <- char_data_preview_cols[[original_col_idx]][i]
-                    cat(formatC(val_str, width = final_cell_widths[j_idx], flag = "-"), " ")
-                }
-                if (c_to_show < nc) cat("...")
-                cat("\n")
-            }
-            
             # --- Ellipsis for Rows ---
-            if (r_to_show < nr) {
-                cat(formatC(paste0("[...", nr - r_to_show, " more rows]"), width = rnames_width -1, flag = "-"), " ")
-                cat("\n")
+            if (max_row < nr) {
+                cat(glue("  ...\n"))
             }
-
-        } else if (!is.null(tbl) && (nrow(tbl) == 0 || ncol(tbl) == 0)) {
-            cat("  (table is empty or has 0 rows/columns)\n")
+            cat(glue("  [{nr} rows x {nc} cols]\n"))
         } else {
-            cat("  (table is NULL)\n")
+            cat("  [table is empty]\n")
         }
         
         cat("---\n") # Separator
 
         # --- rowData ---
         if (!is.null(rd)) {
-            .show_item_line("rowData: ", colnames(rd), term_width,
+            msg <- .make_item_line("rowData: ", colnames(rd), term_width,
                             total_item_count = ncol(rd), item_label_singular = "var", item_label_plural = "vars")
+            cat(msg, "\n")
         } else {
             cat("rowData: NULL\n")
         }
 
         # --- colData ---
         if (!is.null(cd)) {
-            .show_item_line("colData: ", colnames(cd), term_width,
+            msg <- .make_item_line("colData: ", colnames(cd), term_width,
                             total_item_count = ncol(cd), item_label_singular = "var", item_label_plural = "vars")
+            cat(msg, "\n")
         } else {
             cat("colData: NULL\n")
         }
@@ -252,8 +346,9 @@ setMethod("show", "TableContainer",
                 display_meta_items <- paste0("[[", seq_len(min(meta_count, 5)), "]]") # Show first few placeholders
             }
 
-            .show_item_line("metadata: ", display_meta_items, term_width,
+            msg <- .make_item_line("metadata: ", display_meta_items, term_width,
                             total_item_count = meta_count, item_label_singular = "element", item_label_plural = "elements")
+            cat(msg, "\n")
         } else if (!is.null(md) && meta_count == 0) { # Empty list
             cat("metadata: list(0)\n")
         } else { # metadata is NULL

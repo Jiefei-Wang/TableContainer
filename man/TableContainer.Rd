@@ -4,7 +4,7 @@
 \alias{TableContainer}
 \title{The constructor function for TableContainer}
 \usage{
-TableContainer(table = NULL, rowData = NULL, colData = NULL, metadata = list())
+TableContainer(table = NULL, rowData = NULL, colData = NULL, metaData = NULL)
 }
 \arguments{
 \item{table}{A matrix, data.frame, or NULL.}
@@ -13,7 +13,7 @@ TableContainer(table = NULL, rowData = NULL, colData = NULL, metadata = list())
 
 \item{colData}{A data.frame or NULL object describing the columns.}
 
-\item{metadata}{A list or NULL containing arbitrary metadata associated
+\item{metaData}{A list or NULL containing arbitrary metadata associated
 with the overall data.}
 }
 \value{
@@ -27,13 +27,13 @@ colData, and metadata.
 tbl <- matrix(1:12, nrow = 3, ncol = 4)
 row_dt <- data.frame(row1 = 1:3, row2 = letters[1:3])
 col_dt <- data.frame(col1 = 1:4, col2 = letters[1:4])
-metadata <- list(meta1 = "meta1", meta2 = "meta2")
+meta_dt <- list(meta1 = "meta1", meta2 = "meta2")
 
 TableContainer(
-   table = tbl,
-   rowData = row_dt,
-   colData = col_dt,
-   metadata = metadata
- )
+    table = tbl,
+    rowData = row_dt,
+    colData = col_dt,
+    metaData = meta_dt
+)
 
 }

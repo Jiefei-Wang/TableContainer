@@ -10,14 +10,14 @@ test_that("TableContainer slot accessor", {
     col_dt <- data.frame(col1 = 1:col_num, col2 = letters[1:col_num])
     metadata <- list(meta1 = "meta1", meta2 = "meta2")
 
-    container <- TableContainer(tbl, rowData = row_dt, colData = col_dt, metadata = metadata)
+    container <- TableContainer(tbl, rowData = row_dt, colData = col_dt, metaData = metadata)
 
 
     # Test slot accessors
     expect_equal(tblData(container), tbl)
     expect_equal(rowData(container), row_dt)
     expect_equal(colData(container), col_dt)
-    expect_equal(metadata(container), metadata)
+    expect_equal(metaData(container), metadata)
 })
 
 
@@ -31,7 +31,7 @@ test_that("TableContainer valid slot replacement", {
     col_dt <- data.frame(col1 = 1:col_num, col2 = letters[1:col_num])
     metadata <- list(meta1 = "meta1", meta2 = "meta2")
 
-    container <- TableContainer(tbl, rowData = row_dt, colData = col_dt, metadata = metadata)
+    container <- TableContainer(tbl, rowData = row_dt, colData = col_dt, metaData = metadata)
 
     # Test slot replacement
     new_tbl <- matrix(runif(row_num * col_num), nrow = row_num, ncol = col_num)
@@ -52,13 +52,13 @@ test_that("TableContainer valid slot replacement", {
     expect_no_error(tblData(container) <- new_tbl)
     expect_no_error(rowData(container) <- new_row_dt)
     expect_no_error(colData(container) <- new_col_dt)
-    expect_no_error(metadata(container) <- new_metadata)
+    expect_no_error(metaData(container) <- new_metadata)
 
     # Check if the slots are updated correctly
     expect_equal(tblData(container), new_tbl)
     expect_equal(rowData(container), new_row_dt)
     expect_equal(colData(container), new_col_dt)
-    expect_equal(metadata(container), new_metadata)
+    expect_equal(metaData(container), new_metadata)
 
     # marginal case for NULL values
     expect_no_error(tblData(container) <- NULL)
@@ -70,14 +70,14 @@ test_that("TableContainer valid slot replacement", {
     expect_no_error(colData(container) <- NULL)
     expect_equal(colData(container), NULL)
 
-    expect_no_error(metadata(container) <- NULL)
-    expect_equal(metadata(container), NULL)
+    expect_no_error(metaData(container) <- NULL)
+    expect_equal(metaData(container), NULL)
 
     ## set the data back
     expect_no_error(tblData(container) <- tbl)
     expect_no_error(rowData(container) <- row_dt)
     expect_no_error(colData(container) <- col_dt)
-    expect_no_error(metadata(container) <- metadata)
+    expect_no_error(metaData(container) <- metadata)
 })
 
 
@@ -92,7 +92,7 @@ test_that("TableContainer invalid slot replacement", {
     col_dt <- data.frame(col1 = 1:col_num, col2 = letters[1:col_num])
     metadata <- list(meta1 = "meta1", meta2 = "meta2")
 
-    container <- TableContainer(tbl, rowData = row_dt, colData = col_dt, metadata = metadata)
+    container <- TableContainer(tbl, rowData = row_dt, colData = col_dt, metaData = metadata)
 
     # Test slot replacement (unmatched dimensions)
     unmatched_row_num <- row_num + 1
