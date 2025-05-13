@@ -230,11 +230,10 @@ format_tbl <- function(
 
     ## Add the leading text
     if (!is.null(leading_text)){
-        leading_text <- rep(leading_text, length.out = max_row_with_col)
         max_col_width <- max(nchar(leading_text))
-        col_widths <- c(col_widths, max_col_width)
+        # col_widths <- c(col_widths, max_col_width)
         total_len <- total_len + max_col_width
-        char_tbl <- cbind(char_tbl, leading_text)
+        # char_tbl <- cbind(char_tbl, leading_text)
     }
 
     ## Add the row names
@@ -282,6 +281,13 @@ format_tbl <- function(
 
     char_vec <- apply(char_tbl, 1, paste0, collapse = delimiter)
 
+    ## add leading text
+    if (!is.null(leading_text)) {
+        leading_text <- rep(leading_text, length.out = length(char_vec))
+        char_vec <- paste0(leading_text, char_vec)
+    }
+
+    ## add truncate marker to the last column if it is truncated
     for (i in seq_along(char_vec)) {
         if (col_i != ncol(tbl)) {
             if (include_row_names && i == 1) {
@@ -290,6 +296,8 @@ format_tbl <- function(
             char_vec[i] <- paste0(char_vec[i], truncate_marker)
         }
     }
+
+
 
     attr(char_vec, "col_i") <- col_i
     char_vec
