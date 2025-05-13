@@ -6,7 +6,7 @@
 \alias{show,TableContainer-method}
 \title{Show method for TableContainer and its components}
 \usage{
-.printTable(tbl, header = "")
+.printTable(tbl, ...)
 
 .printMeta(meta, name)
 
@@ -15,7 +15,7 @@
 \arguments{
 \item{tbl}{A table-like object (e.g., matrix, data.frame).}
 
-\item{header}{A string to print as the first element in the column names row.}
+\item{...}{Additioanl arguments passed to the \code{format_tbl} function.}
 
 \item{meta}{A list of metadata items.}
 

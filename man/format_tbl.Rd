@@ -14,6 +14,7 @@ format_tbl(
   delimiter = " ",
   truncate_marker = " ...",
   header_name = "",
+  leading_text = NULL,
   include_row_names = TRUE,
   include_col_names = TRUE
 )
@@ -35,6 +36,8 @@ format_tbl(
 
 \item{header_name}{A string to print as the first element in the column names row. It only works when \code{include_col_names = TRUE}.}
 
+\item{leading_text}{A string to print before the table. This can be used to indent the entire table. It can be a single string or a vector of strings. If it is a vector, it will be recycled to match the number of rows in the table.}
+
 \item{include_row_names}{Logical, whether to include row names in the display.}
 
 \item{include_col_names}{Logical, whether to include column names in the display.}
@@ -49,10 +52,10 @@ displayed is limited by the terminal width.
 \examples{
 ## Format the table
 tbl <- data.frame(
-  x = c(1, 123, 123456678, 1235678887644), 
-  y = c("abc", "this is a long string", "another long string", "yet another long string"),
-  z = c(TRUE, FALSE, TRUE, FALSE),
-  d = runif(4) * 100000
+    x = c(1, 123, 123456678, 1235678887644),
+    y = c("abc", "this is a long string", "another long string", "yet another long string"),
+    z = c(TRUE, FALSE, TRUE, FALSE),
+    d = runif(4) * 100000
 )
 formatted_tbl <- format_tbl(tbl, max_tbl_width = 50, max_row = 3)
 cat(formatted_tbl, sep = "\n")

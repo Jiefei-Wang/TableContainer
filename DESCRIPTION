@@ -20,7 +20,8 @@ Depends:
 Imports: 
     methods,
     cli,
-    glue
+    glue,
+    utils
 SystemRequirements: GNU make
 LazyData: true
 Suggests: 
