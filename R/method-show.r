@@ -160,6 +160,7 @@ common_formatter <- function(x, max_len = 20){
 #' @param cell_formatter A function to format individual cells.
 #' @param delimiter The delimiter to use for separating columns.
 #' @param truncate_marker A marker to indicate truncation of the table.
+#' @param header_name A string to print as the first element in the column names row. It only works when `include_col_names = TRUE`.
 #' @param include_row_names Logical, whether to include row names in the display.
 #' @param include_col_names Logical, whether to include column names in the display.
 #' 
@@ -183,6 +184,7 @@ format_tbl <- function(tbl, max_tbl_width, soft_table_width = max_tbl_width,
     cell_formatter = common_formatter,
     delimiter = " ", 
     truncate_marker = " ...",
+    header_name = "",
     include_row_names = TRUE, include_col_names = TRUE) {
     if (is.null(tbl)) {
         return(NULL)
@@ -217,7 +219,7 @@ format_tbl <- function(tbl, max_tbl_width, soft_table_width = max_tbl_width,
     if (include_row_names){
         col_dt <- row_names[row_indices]
         if (include_col_names){
-            col_dt <- c("", col_dt)
+            col_dt <- c(header_name, col_dt)
         }
         max_col_width <- max(c(nchar(col_dt), 0), na.rm = TRUE)
         col_widths <- c(col_widths, max_col_width)
@@ -272,21 +274,19 @@ format_tbl <- function(tbl, max_tbl_width, soft_table_width = max_tbl_width,
 
 
 
-#' Pretty show method for TableContainer
-#' @param object A TableContainer object.
-#' @importMethodsFrom methods show
+#' Show method for TableContainer and its components
+#' 
+#' The show method uses `.printTable` to display the table and `.printMeta` to display the rowMeta, colMeta, and metaData.
+#' 
+#' @param tbl A table-like object (e.g., matrix, data.frame).
+#' @param header A string to print as the first element in the column names row. 
+#' 
+#' 
+#' @rdname show-TableContainer-method
 #' @export
-setMethod("show", "TableContainer",
-    function(object) {
-        tbl <- tblData(object)
-        rd <- rowData(object)
-        cd <- colData(object) 
-        md <- metaData(object)
-
+.printTable <- function(tbl, header = ""){
         term_width <- get_terminal_width()
 
-        # --- Table Preview ---
-        cat("# TableContainer:\n")
         if (!is.null(tbl)) {
             nr <- nrow(tbl)
             nc <- ncol(tbl)
@@ -299,6 +299,7 @@ setMethod("show", "TableContainer",
                     cell_formatter = common_formatter,
                     delimiter = " ", 
                     truncate_marker = " ...",
+                    header = header,
                     include_row_names = TRUE, include_col_names = TRUE)
             
             if (!is.null(tbl)){
@@ -315,44 +316,58 @@ setMethod("show", "TableContainer",
             cat("  [table is empty]\n")
         }
         
-        cat("---\n") # Separator
+        cat("\n") # Separator
+}
+
+#' @param meta A list of metadata items.
+#' @param name A string representing the name of the metadata.
+#' 
+#' @rdname show-TableContainer-method
+#' @export
+.printMeta <- function(meta, name) {
+    term_width <- get_terminal_width()
+    if (!is.null(meta)&&length(meta) > 0) {
+        # If names are NULL but there are elements, create placeholder like "[[1]], [[2]]"
+        display_meta_items <- names(meta)
+        if (is.null(display_meta_items)){
+            display_meta_items <- paste0("[[", seq_along(meta), "]]")
+        }
+        for(i in seq_along(display_meta_items)) {
+            if (display_meta_items[i] == "") {
+                display_meta_items[i] <- paste0("[[", i, "]]")
+            }
+        }
+
+        msg <- .make_item_line(glue("{name}: "), display_meta_items, term_width,
+                        total_item_count = ncol(meta), item_label_singular = "var", item_label_plural = "vars")
+        cat(msg, "\n")
+    }
+}
+
+
+
+#' @param object A TableContainer object.
+#' @importMethodsFrom methods show
+#' @rdname show-TableContainer-method
+#' @export
+setMethod("show", "TableContainer",
+    function(object) {
+        tbl <- tblData(object)
+        rd <- rowData(object)
+        cd <- colData(object) 
+        md <- metaData(object)
+
+        # --- Table Preview ---
+        cat("# TableContainer:\n")
+        .printTable(tbl, header = "")
 
         # --- rowData ---
-        if (!is.null(rd)) {
-            msg <- .make_item_line("rowData: ", colnames(rd), term_width,
-                            total_item_count = ncol(rd), item_label_singular = "var", item_label_plural = "vars")
-            cat(msg, "\n")
-        } else {
-            cat("rowData: NULL\n")
-        }
+        .printMeta(rd, "rowData")
 
         # --- colData ---
-        if (!is.null(cd)) {
-            msg <- .make_item_line("colData: ", colnames(cd), term_width,
-                            total_item_count = ncol(cd), item_label_singular = "var", item_label_plural = "vars")
-            cat(msg, "\n")
-        } else {
-            cat("colData: NULL\n")
-        }
+        .printMeta(cd, "colData")
         
         # --- metadata ---
-        meta_names <- if(!is.null(md)) names(md) else NULL
-        meta_count <- if(!is.null(md)) length(md) else 0
-        
-        if (meta_count > 0) {
-             # If names are NULL but there are elements, create placeholder like "[[1]], [[2]]"
-            display_meta_items <- meta_names
-            if (is.null(meta_names) && meta_count > 0) {
-                display_meta_items <- paste0("[[", seq_len(min(meta_count, 5)), "]]") # Show first few placeholders
-            }
-
-            msg <- .make_item_line("metadata: ", display_meta_items, term_width,
-                            total_item_count = meta_count, item_label_singular = "element", item_label_plural = "elements")
-            cat(msg, "\n")
-        } else if (!is.null(md) && meta_count == 0) { # Empty list
-            cat("metadata: list(0)\n")
-        } else { # metadata is NULL
-            cat("metadata: NULL\n")
-        }
+        .printMeta(md, "metaData")
     }
 )

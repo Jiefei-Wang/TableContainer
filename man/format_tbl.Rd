@@ -13,6 +13,7 @@ format_tbl(
   cell_formatter = common_formatter,
   delimiter = " ",
   truncate_marker = " ...",
+  header_name = "",
   include_row_names = TRUE,
   include_col_names = TRUE
 )
@@ -31,6 +32,8 @@ format_tbl(
 \item{delimiter}{The delimiter to use for separating columns.}
 
 \item{truncate_marker}{A marker to indicate truncation of the table.}
+
+\item{header_name}{A string to print as the first element in the column names row. It only works when \code{include_col_names = TRUE}.}
 
 \item{include_row_names}{Logical, whether to include row names in the display.}
 
