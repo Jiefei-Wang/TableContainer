@@ -10,7 +10,7 @@
 \alias{rownames<-,TableContainer-method}
 \alias{colnames,TableContainer-method}
 \alias{colnames<-,TableContainer-method}
-\alias{[.TableContainer}
+\alias{[,TableContainer-method}
 \alias{tblData}
 \alias{tblData<-}
 \alias{rowData}
@@ -45,7 +45,7 @@
 
 \S4method{colnames}{TableContainer}(x) <- value
 
-\method{[}{TableContainer}(x, i, j, ...)
+\S4method{[}{TableContainer}(x, i, j, ..., drop = TRUE)
 
 tblData(object)
 
@@ -89,6 +89,8 @@ metaData(object) <- value
 \item{j}{Column indices for subsetting.}
 
 \item{...}{Additional arguments.}
+
+\item{drop}{Not used.}
 
 \item{object}{A TableContainer object.}
 }

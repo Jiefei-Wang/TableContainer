@@ -2,11 +2,13 @@
 
 #' @param i Row indices for subsetting. If only `i` is provided, it will return the entire row(s).
 #' @param j Column indices for subsetting.
+#' @param drop Not used.
 #' @param ... Additional arguments.
 #' @rdname TableContainer-method
 #' @return `[`: A new TableContainer object with the selected data.
 #' @export
-`[.TableContainer` <- function(x, i, j, ...) {
+setMethod("[", signature(x = "TableContainer"), 
+          function(x, i, j, ..., drop = TRUE) {
     call <- match.call()
 
     i_is_provided <- "i" %in% names(call)
@@ -37,5 +39,5 @@
         colData = cd,
         metaData = md
     )
-}
+})
 
