@@ -10,7 +10,7 @@ Authors@R:
     comment = c(ORCID = "0000-0002-2709-5332"))
 Description: 
     Offers a 'TableContainer' function to create tables enriched with row, column, and table annotations. Designed to work independently of Bioconductor, it ensures annotations are automatically updated when the table is subset. Additionally, it includes 'format_tbl' methods for enhanced table formatting and display.
-License: MIT
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
