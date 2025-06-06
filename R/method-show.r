@@ -82,7 +82,16 @@
 
 # Get the width of the terminal
 get_terminal_width <- function() {
-    console_width()
+    width <- tryCatch(
+        {
+            console_width()
+        },
+        error = function(e) {
+            # Fallback to a default width if console_width fails
+            80
+        }
+    )
+    width
 }
 
 #' Common functions for formatting table cells
