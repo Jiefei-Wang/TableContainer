@@ -23,6 +23,13 @@
 
 \item{object}{A TableContainer object.}
 }
+\value{
+\code{.printTable}: No return value, called for side effects of printing the table to the console.
+
+\code{.printMeta}: No return value, called for side effects of printing metadata information to the console.
+
+\code{show}: No return value, called for side effects of displaying the TableContainer object contents to the console.
+}
 \description{
 The show method uses \code{.printTable} to display the table and \code{.printMeta} to display the rowMeta, colMeta, and metaData.
 }

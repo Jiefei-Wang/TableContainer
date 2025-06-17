@@ -9,7 +9,7 @@ Authors@R:
     role = c("aut", "cre"),
     comment = c(ORCID = "0000-0002-2709-5332"))
 Description: 
-    Offers a 'TableContainer' function to create tables enriched with row, column, and table annotations. Designed to work independently of Bioconductor, it ensures annotations are automatically updated when the table is subset. Additionally, it includes 'format_tbl' methods for enhanced table formatting and display.
+    Offers a TableContainer() function to create tables enriched with row, column, and table annotations. This package is similar to 'SummarizedExperiment' in Bioconductor <doi:10.18129/B9.bioc.SummarizedExperiment>, but designed to work independently of Bioconductor, it ensures annotations are automatically updated when the table is subset. Additionally, it includes format_tbl() methods for enhanced table formatting and display.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

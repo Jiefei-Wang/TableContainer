@@ -98,6 +98,7 @@ get_terminal_width <- function() {
 #'
 #' @param x A vector of values to format.
 #' @param max_len The maximum length for the formatted string.
+#' @return A character string with the formatted number. If the number cannot fit within the specified maximum length, scientific notation is used with reduced digits.
 #' @details
 #' `pretty_number` : keep all digits if we can keep it within the width limit. Otherwise, use scientific notation to reduce length. If the number still cannot fit within the length limit, return the shortest result.
 #' @seealso [format_tbl()] for formatting tables
@@ -151,6 +152,7 @@ pretty_number <- function(x, max_len = 20) {
 #' Common functions for formatting table cells
 #'
 #' @param x A vector of values to format.
+#' @return A character vector of the same length as x with formatted values. For numeric values, uses pretty_number() formatting. For non-numeric values, truncates strings longer than max_len and appends "..." if needed.
 #' @details
 #' `common_formatter` : For numeric, call `pretty_number` to format the number. For non-numeric, truncate the string and append "..." if it exceeds the width limit.
 #' @examples
@@ -320,6 +322,7 @@ format_tbl <- function(
 #'
 #' @param tbl A table-like object (e.g., matrix, data.frame).
 #' @param ... Additioanl arguments passed to the `format_tbl` function.
+#' @return `.printTable`: No return value, called for side effects of printing the table to the console.
 #'
 #'
 #' @rdname show-TableContainer-method
@@ -371,6 +374,7 @@ format_tbl <- function(
 
 #' @param meta A list of metadata items.
 #' @param name A string representing the name of the metadata.
+#' @return `.printMeta`: No return value, called for side effects of printing metadata information to the console.
 #'
 #' @rdname show-TableContainer-method
 #' @export
@@ -398,6 +402,7 @@ format_tbl <- function(
 
 
 #' @param object A TableContainer object.
+#' @return `show`: No return value, called for side effects of displaying the TableContainer object contents to the console.
 #' @importMethodsFrom methods show
 #' @rdname show-TableContainer-method
 #' @export

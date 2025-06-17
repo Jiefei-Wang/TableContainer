@@ -14,6 +14,11 @@ common_formatter(x, max_len = 20)
 
 \item{max_len}{The maximum length for the formatted string.}
 }
+\value{
+A character string with the formatted number. If the number cannot fit within the specified maximum length, scientific notation is used with reduced digits.
+
+A character vector of the same length as x with formatted values. For numeric values, uses pretty_number() formatting. For non-numeric values, truncates strings longer than max_len and appends "..." if needed.
+}
 \description{
 Common functions for formatting table cells
 
